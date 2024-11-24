@@ -20,17 +20,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 ## Model Weights
-You'll need to download the pre-trained model weights and place them in a weights directory:
+You'll need to download the pre-trained model weights and place them in a `weights` directory:
 - `anatomy.ckpt`
 - `spine_location_view.ckpt`
 - `spine_sequence.ckpt`
 - `spinal_cord.ckpt`
 - `lesion_segmentation.ckpt`
 
-Notes: To download the weights, you can download from this link. (We will upload the weights to the cloud soon.)
+Notes: To download the weights, you can download from this [link](https://drive.google.com/drive/folders/1xFOiLHuXXMFXSrvEGC4iggeEZIxP3kpA?usp=drive_link).
 
 ## Data Sample
-To see the sample data, you can download from this link. (We will upload the data to the cloud soon.)
+To see the sample data, you can download from this [link](https://drive.google.com/drive/folders/1oklPwOPRiev0fWvoQ7D4yd6RjENhuOfu?usp=drive_link).
+
+The data it self originated from the [Spine Generic Dataset](https://github.com/spine-generic/data-multi-subject) with some modifications to add synthetic lesions.
 
 ## Usage
 
