@@ -32,6 +32,7 @@ class ImageSegmenter:
     def segment(
         self,
         dataset: torch.utils.data.Dataset,
+        directory_path: Path,
         output_dir: Path,
     ) -> tuple[List[str], float]:
         """
@@ -54,10 +55,14 @@ class ImageSegmenter:
             for i, path in enumerate(paths):
                 # Preserve the folder structure
                 rel_path = Path(path)
+                relative_parts = rel_path.relative_to(directory_path).parent
 
                 # Create output path with 'predict_' prefix
                 output_path = (
-                    Path(output_dir) / rel_path.parent / f"predict_{rel_path.name}"
+                    Path(output_dir)
+                    / directory_path.name
+                    / relative_parts
+                    / f"predict_{rel_path.name}"
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
 

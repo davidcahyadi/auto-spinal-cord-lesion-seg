@@ -17,15 +17,22 @@ class InferenceDataset(Dataset):
         self.to_dtype = v2.ToDtype(torch.float32, scale=True)
 
     def __getitem__(self, item):
-        image = np.array(Image.open(self.paths[item]))
-        image = self.resize(image=image)["image"]
+        try:
+            image = np.array(Image.open(self.paths[item]))
+            image = self.resize(image=image)["image"]
+            if len(image.shape) > 2:
+                print(image.shape)
 
-        if len(image.shape) >= 3:
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            if len(image.shape) >= 3:
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-        image = np.expand_dims(image, axis=2)
-        image = self.to_image(image)
-        image = self.to_dtype(image)
+            image = np.expand_dims(image, axis=2)
+            image = self.to_image(image)
+            image = self.to_dtype(image)
+
+        except Exception as e:
+            print(f"Error loading image {self.paths[item]}")
+            raise e
 
         return image, self.paths[item]
 

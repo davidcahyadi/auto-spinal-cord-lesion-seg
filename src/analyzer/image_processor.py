@@ -60,7 +60,7 @@ class ImageProcessor:
         location_view_images = self._process_location_view(anatomy_images)
         sequence_images = self._process_sequence(location_view_images)
         spinal_cord_images = self._process_spinal_cord(sequence_images)
-        self._process_lesion_segmentation(spinal_cord_images, output_dir)
+        self._process_lesion_segmentation(spinal_cord_images,directory_path, output_dir)
 
     def _process_anatomy(self, images: List[str]) -> List[str]:
         """Process anatomy images using a pre-trained model"""
@@ -140,7 +140,7 @@ class ImageProcessor:
         )
         return filtered_spinal_cord
 
-    def _process_lesion_segmentation(self, images: List[str], output_dir: Path):
+    def _process_lesion_segmentation(self, images: List[str], directory_path: Path, output_dir: Path):
         """Process lesion segmentation images"""
         print("Segmenting lesion images ", end="")
         segmenter = ImageSegmenter(
@@ -149,7 +149,7 @@ class ImageProcessor:
             batch_size=16,
         )
         dataset = InferenceDataset(images, size=320)
-        total_time = segmenter.segment(dataset, output_dir)
+        total_time = segmenter.segment(dataset, directory_path, output_dir)
         print(f"Done in {total_time:.4f}s")
 
     def _get_series_directories(self, main_path: Path):
