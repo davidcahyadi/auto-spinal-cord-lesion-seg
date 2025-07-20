@@ -1,0 +1,68 @@
+project_name: "Sagittal Lesion Segmentation"
+seed: 420
+directory: "../../_directory_ssd.yaml"
+model:
+    name: ImproveSTAMPUNet
+    in_channels: 1
+    out_channels: 1 
+    init_features: 16
+    last_activation: sigmoid
+    pretrained: D:/David/Tesis/logs/wandb/run-20250305_222244-lesion_segmentation_2025-03-05_01_20250305-222242/checkpoints/epoch=111-val_loss=0.060547.ckpt
+    loss:
+        name: DiceLoss
+        params: {}
+trainer:
+    name: "pytorch_lightning"
+    epochs: 3000
+    log_every: 1
+    val_every: 1
+    gpus: 1
+    precision: 32
+    lr:
+        init_value: 1e-2
+    optimizer:
+        name: Adam
+        params: {}
+    loader:
+        batch_size: 32
+        num_workers: 1
+        pin_memory: true
+        persistent_workers: true
+    callbacks: 
+        - name: PruningCallback
+          params:
+            prune_every_n_epochs: 30
+            prune_percentage: 1
+            pruning_mode: 'Taylor'
+            total_pruning_iterations: 80
+            recovery_epochs: 30
+        - name: LearningRateMonitor
+          params:
+            logging_interval: epoch
+        - name: ModelCheckpoint
+          params:
+            filename: "{epoch:03d}-{val_loss:.6f}"
+            save_top_k: 3
+            save_last: true
+            monitor: val_loss
+        - name: SegmentationSampler
+          params:
+            image_amount: 3
+            class_labels:
+                1: lesion
+data: "../../dataset/lesion_segmentation_s6_1_320.yaml"
+metric:
+    - name: torchmetrics.JaccardIndex
+      alias: iou
+      params:
+          task: binary
+          ml_type: segmentation
+      on_bar: false
+    - name: torchmetrics.Dice
+      params: 
+          num_classes: 2
+          ignore_index: 0
+          ml_type: segmentation
+      on_bar: true
+logger:
+    name: "wandb"

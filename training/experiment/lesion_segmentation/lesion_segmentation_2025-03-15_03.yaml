@@ -1,0 +1,65 @@
+project_name: "Sagittal Lesion Segmentation"
+seed: 420
+directory: "../../_directory_ssd.yaml"
+model:
+    name: UNET
+    in_channels: 1
+    out_channels: 1 
+    depth: 4
+    features: 6
+    out_activation: null
+    last_activation: sigmoid
+    use_batch_norm: True
+    use_xavier: False
+    pretrained: D:\David\Tesis\logs\wandb\run-20250314_040154-lesion_segmentation_2025-03-14_03_20250314-040152\checkpoints\epoch=185-val_loss=0.000769.ckpt
+    loss:
+        name: BCEWithLogitsLoss
+        params: {}
+trainer:
+    name: "pytorch_lightning"
+    epochs: 200
+    log_every: 1
+    val_every: 1
+    gpus: 1
+    precision: 32
+    lr:
+        init_value: 1e-3
+    optimizer:
+        name: Adam
+        params: {}
+    loader:
+        batch_size: 96
+        num_workers: 4
+        pin_memory: true
+        persistent_workers: true
+    callbacks: 
+        - name: LearningRateMonitor
+          params:
+            logging_interval: epoch
+        - name: ModelCheckpoint
+          params:
+            filename: "{epoch:03d}-{val_loss:.6f}"
+            save_top_k: 3
+            save_last: true
+            monitor: val_loss
+        - name: SegmentationSampler
+          params:
+            image_amount: 3
+            class_labels:
+                1: lesion
+data: "../../dataset/lesion_segmentation_s6_1_320.yaml"
+metric:
+    - name: torchmetrics.JaccardIndex
+      alias: iou
+      params:
+          task: binary
+          ml_type: segmentation
+      on_bar: false
+    - name: torchmetrics.Dice
+      params: 
+          num_classes: 2
+          ignore_index: 0
+          ml_type: segmentation
+      on_bar: true
+logger:
+    name: "wandb"

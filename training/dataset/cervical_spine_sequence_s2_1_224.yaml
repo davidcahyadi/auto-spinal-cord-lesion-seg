@@ -1,0 +1,71 @@
+---
+dataset:
+    cervical_sagittal_sequence_sanglah:
+        path: "cervical_sagittal_sequence_sanglah"
+        crawler:
+            name: file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+    cervical_sagittal_sequence_siloam:
+        path: "cervical_sagittal_sequence_siloam"
+        crawler:
+            name: file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+    cervical_sagittal_sequence_spine_generic:
+        path: "cervical_sagittal_sequence_spine_generic"
+        crawler:
+            name: file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+preprocess:
+    - name: label_encoding
+      params:
+          ordered: true
+      target: [label]
+      phase: [train, val, test]
+    - name: alb.Resize
+      params:
+          width: 224
+          height: 224
+      target: [data]
+      phase: [train, val, test]
+    - name: to_gray
+      params: {}
+      target: [data]
+      phase: [train, val, test]
+    - name: alb.RandomBrightnessContrast
+      params:
+        brightness_limit: 0.2
+        contrast_limit: 0.2
+        p: 0.5
+      target: [data]
+      phase: [train]
+    - name: alb.ToFloat
+      params: 
+          max_value: 255
+      target: [data]
+      phase: [train, val, test]
+    - name: one_hot_encoding
+      params: {}
+      target: [label]
+      phase: [train, val, test]
+    - name: alb.ToTensorV2
+      params: {}
+      target: [data, label]
+      phase: [train, val, test]
+batch_preprocess: []
+postprocess:
+    - name: softmax
+      params: {}
+      target: [prediction]
+      phase: [train, val, test]

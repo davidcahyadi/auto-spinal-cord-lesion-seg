@@ -1,0 +1,48 @@
+---
+dataset:
+    foundation_radimagenet:
+        path: "foundation_radimagenet_dataset"
+        crawler:
+            name: file
+            params: {}
+        driver: torchvision
+        pipeline:
+            - name: shuffle
+              params: {}
+preprocess:
+    - name: label_encoding
+      params:
+          ordered: true
+      target: [label]
+      phase: [train, val, test]
+    - name: tv.Resize
+      params:
+          size: [224,224]
+      target: [data]
+      phase: [train, val, test]
+    - name: tv.Grayscale
+      params: 
+          num_output_channels: 1
+      target: [data]
+      phase: [train, val, test]
+    - name: tv.ToImage
+      params: {}
+      target: [data]
+      phase: [train, val, test]
+    - name: one_hot_encoding
+      params: {}
+      target: [label]
+      phase: [train, val, test]
+    - name: tv.ToDtype
+      params:
+          dtype: float32
+          scale: true
+      target: [data, label]
+      phase: [train, val, test]
+batch_preprocess: []
+
+postprocess:
+    - name: softmax
+      params: {}
+      target: [prediction]
+      phase: [train, val, test]

@@ -1,0 +1,107 @@
+---
+dataset:
+    spinal_cord_segmentation_sanglah_siloam:
+        path: "spinal_cord_segmentation_sanglah_siloam_v1"
+        crawler:
+            name: segmentation_file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+    spinal_cord_segmentation_spine_generic:
+        path: "spinal_cord_segmentation_spine_generic"
+        crawler:
+            name: segmentation_file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+preprocess:
+    - name: load_segmentation_label
+      params: {}
+      target: [label]
+      phase: [train, val, test]
+    - name: to_gray
+      params: {}
+      target: [data]
+      phase: [train, val, test]
+    - name: alb.Resize
+      params:
+          width: 320
+          height: 320
+      target: [data, label]
+      phase: [train, val, test]
+    # augmentation
+    - name: alb.Blur
+      params:
+          blur_limit: 3
+          p: 0.2
+      target: [data]
+      phase: [train]
+
+    - name: alb.RandomCrop
+      params:
+          height: 300
+          width: 300
+          p: 0.2
+      target: [data, label]
+      phase: [train]
+
+    - name: alb.HorizontalFlip
+      params:
+          p: 0.3
+      target: [data, label]
+      phase: [train]
+
+    - name: alb.RandomBrightnessContrast
+      params:
+          brightness_limit: [-0.2, 0.2]  # ScaleFloatType
+          contrast_limit: [-0.2, 0.2]  # ScaleFloatType
+          brightness_by_max: True  # bool
+          p: 0.2  # float
+      target: [data]
+      phase: [train]
+
+    - name: alb.GaussNoise
+      params:
+          var_limit: [10.0,50.0]
+          mean: 0
+          per_channel: True
+          p: 0.2
+      target: [data]
+      phase: [train]
+
+    - name: alb.Rotate
+      params:
+          limit: [-15, 15]
+          interpolation: 1
+          border_mode: 4
+          p: 0.1
+      target: [data, label]
+      phase: [train]
+
+    - name: alb.Resize
+      params:
+          width: 320
+          height: 320
+      target: [data, label]
+      phase: [train, val, test]
+
+    - name: tv.ToImage
+      params: {}
+      target: [data, label]
+      phase: [train, val, test]
+    - name: tv.ToDtype
+      params:
+          dtype: float32
+          scale: true
+      target: [data]
+      phase: [train, val, test]
+batch_preprocess: []
+postprocess:
+    - name: sigmoid
+      params: {}
+      target: [prediction]
+      phase: [train, val, test]

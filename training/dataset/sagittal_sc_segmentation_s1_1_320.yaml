@@ -1,0 +1,49 @@
+---
+dataset:
+    foundation_radimagenet:
+        path: "spinal_cord_segmentation_sanglah_siloam_v1"
+        crawler:
+            name: segmentation_file
+            params: {}
+        driver: pillow
+        pipeline:
+            - name: shuffle
+              params: {}
+preprocess:
+    - name: load_segmentation_label
+      params: {}
+      target: [label]
+      phase: [train, val, test]
+    - name: alb.Resize
+      params:
+          width: 320
+          height: 320
+      target: [data, label]
+      phase: [train, val, test]
+    - name: to_gray
+      params: {}
+      target: [data]
+      phase: [train, val, test]
+    - name: alb.RandomBrightnessContrast
+      params:
+        brightness_limit: 0.2
+        contrast_limit: 0.2
+        p: 0.5
+      target: [data]
+      phase: [train]
+    - name: tv.ToImage
+      params: {}
+      target: [data, label]
+      phase: [train, val, test]
+    - name: tv.ToDtype
+      params:
+          dtype: float32
+          scale: true
+      target: [data]
+      phase: [train, val, test]
+batch_preprocess: []
+postprocess:
+    - name: sigmoid
+      params: {}
+      target: [prediction]
+      phase: [train, val, test]

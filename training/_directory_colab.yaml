@@ -1,0 +1,5 @@
+---
+log: "/content/logs/"
+weights: "/content/logs/"
+data: "/content/data/"
+model: "/content/deep-learning-sci-v2/models"

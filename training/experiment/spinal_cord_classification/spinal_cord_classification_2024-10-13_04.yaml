@@ -1,0 +1,81 @@
+project_name: "Sagittal Spinal Cord Classification"
+seed: 420
+directory: "../../_directory_ssd.yaml"
+model:
+    name: MobileNetV4
+    size: hybrid_medium_224
+    num_classes: 2
+    in_channels: 1
+    pretrained: D:\David\Tesis\logs\wandb\run-20240906_190801-foundation_2024-09-03_01_20240906-190758\checkpoints\epoch=049-train_loss=0.10153.ckpt
+    freeze: false
+    loss:
+        name: CrossEntropyLoss
+        params: {}
+trainer:
+    name: "pytorch_lightning"
+    epochs: 25
+    log_every: 1
+    val_every: 1
+    gpus: 1
+    precision: 16
+    lr:
+        init_value: 1e-3
+        scheduler:
+            name: CosineLRScheduler
+            params:
+                cycle_decay: 2.5e-2
+    optimizer:
+        name: AdamW
+        params: {}
+    loader:
+        batch_size: 200
+        num_workers: 12
+        pin_memory: true
+        persistent_workers: true
+    sampler:
+      name: WeightedRandomSampler
+      params: {}
+    callbacks: 
+        - name: LearningRateMonitor
+          params:
+            logging_interval: epoch
+        - name: ModelCheckpoint
+          params:
+            filename: "{epoch:03d}-{train_loss:.5f}"
+            save_top_k: 3
+            save_last: true
+            monitor: train_loss
+data: "../../dataset/sagittal_sc_classification_s3_1_224.yaml"
+metric:
+    - name: torchmetrics.Accuracy
+      params:
+          num_classes: 2
+          task: multiclass
+          ml_type: classification
+      on_bar: false
+    - name: torchmetrics.F1Score
+      alias: f1_micro
+      params:
+          num_classes: 2
+          task: multiclass
+          average: micro
+          ml_type: classification
+      on_bar: true
+    - name: torchmetrics.F1Score
+      alias: f1_weighted
+      params:
+          num_classes: 2
+          task: multiclass
+          average: weighted
+          ml_type: classification
+      on_bar: false
+    - name: torchmetrics.F1Score
+      alias: f1_macro
+      params:
+          num_classes: 2
+          task: multiclass
+          average: macro
+          ml_type: classification
+      on_bar: false
+logger:
+    name: "wandb"
