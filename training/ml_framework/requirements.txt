@@ -1,0 +1,8 @@
+torchvision
+pydantic
+lightning
+albumentations
+wandb
+mlflow
+python-dotenv
+timm
